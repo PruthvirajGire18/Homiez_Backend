@@ -8,6 +8,9 @@ import Auth from "./routes/Auth.js";
 import User from "./routes/User.js";
 import Chat from "./routes/Chat.js";
 
+/* ===============================
+   ENV CONFIG
+================================ */
 dotenv.config();
 
 const app = express();
@@ -19,18 +22,23 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* ===============================
-   CORS
+   CORS CONFIG (SERVERLESS SAFE)
 ================================ */
 const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.CLIENT_URL,
+  "http://localhost:5173",          // local dev
+  process.env.CLIENT_URL,           // netlify prod
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // allow server-to-server, Postman, etc.
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
       return callback(null, false);
     },
     credentials: true,
@@ -41,7 +49,7 @@ app.use(
    ROUTES
 ================================ */
 app.get("/", (req, res) => {
-  res.json({ status: "Homiez backend running" });
+  res.json({ status: "Homiez backend running 🚀" });
 });
 
 app.use("/api/auth", Auth);
@@ -49,13 +57,15 @@ app.use("/api/user", User);
 app.use("/api/chat", Chat);
 
 /* ===============================
-   DB CONNECT (SAFE)
+   DATABASE CONNECTION
+   (SERVERLESS SAFE)
 ================================ */
-connectDB().catch((err) => {
-  console.error("MongoDB connection failed", err);
-});
+connectDB()
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection failed:", err));
 
 /* ===============================
-   EXPORT (NO app.listen)
+   EXPORT FOR VERCEL
+   (NO app.listen)
 ================================ */
 export default app;

@@ -9,7 +9,6 @@ import User from "./routes/User.js";
 import Chat from "./routes/Chat.js";
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
@@ -20,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* ===============================
-   CORS CONFIG
+   CORS
 ================================ */
 const allowedOrigins = [
   "http://localhost:5173",
@@ -32,20 +31,17 @@ app.use(
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
+      return callback(null, false);
     },
     credentials: true,
   })
 );
 
-// Preflight
-app.options("*", cors());
-
 /* ===============================
    ROUTES
 ================================ */
 app.get("/", (req, res) => {
-  res.json({ message: "🚀 Homiez Backend running on Vercel" });
+  res.json({ status: "Homiez backend running" });
 });
 
 app.use("/api/auth", Auth);
@@ -53,7 +49,13 @@ app.use("/api/user", User);
 app.use("/api/chat", Chat);
 
 /* ===============================
-   ❌ NO app.listen() ON VERCEL
+   DB CONNECT (SAFE)
 ================================ */
+connectDB().catch((err) => {
+  console.error("MongoDB connection failed", err);
+});
 
+/* ===============================
+   EXPORT (NO app.listen)
+================================ */
 export default app;

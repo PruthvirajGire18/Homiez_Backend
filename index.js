@@ -20,39 +20,32 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* ===============================
-   CORS CONFIG (IMPORTANT)
+   CORS CONFIG
 ================================ */
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://homiez18.netlify.app", // ✅ your Netlify frontend
+  "https://homiez18.netlify.app",
 ];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow server-to-server, Postman, etc.
+    origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// 🔥 Preflight fix
+// Preflight
 app.options("*", cors());
 
 /* ===============================
    ROUTES
 ================================ */
 app.get("/", (req, res) => {
-  res.send("🚀 Homiez Backend is running");
+  res.json({ message: "🚀 Homiez Backend running on Vercel" });
 });
 
 app.use("/api/auth", Auth);
@@ -60,10 +53,7 @@ app.use("/api/user", User);
 app.use("/api/chat", Chat);
 
 /* ===============================
-   SERVER
+   ❌ NO app.listen() ON VERCEL
 ================================ */
-const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🔥 Server running on port ${PORT}`);
-});
+export default app;

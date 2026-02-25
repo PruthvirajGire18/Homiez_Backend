@@ -23,8 +23,8 @@ app.use(cookieParser());
 ================================ */
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://homiez18.netlify.app",
-];
+  process.env.CLIENT_URL,
+].filter(Boolean);
 
 app.use(
   cors({
